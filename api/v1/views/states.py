@@ -39,7 +39,6 @@ def state_by_id(state_id):
                     storage.get("State", state_id))
     if request.method == 'PUT':
         returnedValue, code = State.api_put(
-                    ['id', 'created_at', 'updated_at'],
                     request.get_json(silent=True),
                     storage.get("State", state_id))
     if code == 404:

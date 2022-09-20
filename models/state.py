@@ -11,6 +11,8 @@ from sqlalchemy.orm import relationship
 
 class State(BaseModel, Base):
     """Representation of state """
+
+    IGNORE_ATTR = ['id', 'created_at', 'updated_at']
     if models.storage_t == "db":
         __tablename__ = 'states'
         name = Column(String(128), nullable=False)
@@ -32,3 +34,10 @@ class State(BaseModel, Base):
                 if city.state_id == self.id:
                     city_list.append(city)
             return city_list
+
+    @classmethod
+    def api_put(cls, resuestDataAsDict, ObjToUpdate):
+        return(BaseModel.api_put(
+                cls.IGNORE_ATTR,
+                resuestDataAsDict,
+                ObjToUpdate))
