@@ -77,7 +77,7 @@ class BaseModel:
         models.storage.delete(self)
 
     @classmethod
-    def storage_update(cls, listToIgnore, resuestDataAsDict, ObjToUpdate):
+    def storage_update(cls, resuestDataAsDict, objectId):
         """handles the update command for all types
         Return Values: 0: Success
         Exceptions Raised
@@ -85,17 +85,19 @@ class BaseModel:
         -2: BaseModelInvalidJson"""
         if not cls.test_request_data(resuestDataAsDict):
             raise BaseModelInvalidDataDictionary(resuestDataAsDict)
+        ObjToUpdate = models.storage.get("State", objectId)
         if ObjToUpdate is None:
-            raise BaseModelInvalidObject(ObjToUpdate)
+            raise BaseModelInvalidObject(None)
         for key, value in resuestDataAsDict.items():
-            if key in listToIgnore:
+            if key in cls.IGNORE_ATTR:
                 continue
             setattr(ObjToUpdate, key, value)
         ObjToUpdate.save()
+        models.storage.save()
         return (ObjToUpdate.to_dict())
 
     @classmethod
-    def storage_create(cls, listOfReqAttrs, resuestDataAsDict):
+    def storage_create(cls, resuestDataAsDict):
         """handles the API post command for all types
         Return Values: dictionary of New Object.
         Exceptions Raised:
@@ -103,7 +105,7 @@ class BaseModel:
         -2: invalid Json"""
         if not cls.test_request_data(resuestDataAsDict):
             raise BaseModelInvalidDataDictionary(resuestDataAsDict)
-        for attribute in listOfReqAttrs:
+        for attribute in cls.REQUIRED_ATTR:
             if resuestDataAsDict.get(attribute) is None:
                 raise BaseModelMissingAttribute(attribute)
         newObject = cls(**resuestDataAsDict)
@@ -117,31 +119,33 @@ class BaseModel:
             return (False)
         return (True)
 
-    @staticmethod
-    def storage_delete(objectToDelete):
+    @classmethod
+    def storage_delete(cls, idOfObjectToDelete):
         """handles the API delete command for all types
         return Values: 200: success
         404: invalid object.
         """
+        objectToDelete = models.storage.get(cls, idOfObjectToDelete)
         if objectToDelete is None:
             raise BaseModelInvalidObject(objectToDelete)
         objectToDelete.delete()
         models.storage.save()
         return ({})
 
-    @staticmethod
-    def storage_get_dict_from_object(ObjToRetrieve):
+    @classmethod
+    def storage_get_dict_from_object(cls, idOfObjToRetrieve):
         """handles the API get command for specific object
         return Values: 200: success
         404: invalid object.
         """
+        ObjToRetrieve = models.storage.get(cls, idOfObjToRetrieve)
         if ObjToRetrieve is None:
             raise BaseModelInvalidObject(ObjToRetrieve)
         return (ObjToRetrieve.to_dict())
 
-    @staticmethod
-    def storage_get_dict_array_from_object_array(arrayOfObjsToRetrieve):
+    @classmethod
+    def storage_get_dict_array_from_class(cls):
         """handles the API get command for all objects
         return Values: 200: success
         """
-        return ([obj.to_dict() for obj in arrayOfObjsToRetrieve])
+        return ([obj.to_dict() for obj in models.storage.all(cls).values()])

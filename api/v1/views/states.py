@@ -15,7 +15,7 @@ from models.state import State
                  strict_slashes=False)
 def get_all_states():
     """Retrieves the list of all State objects"""
-    return (jsonify(State.api_get_all()), 200)
+    return (jsonify(State.storage_get_dict_array_from_class()), 200)
 
 @app_views.route('/states',
                  methods=['POST'],
@@ -23,7 +23,7 @@ def get_all_states():
 def post_a_state():
     """Creates a State"""
     try:
-        returnedValue = State.api_post(
+        returnedValue = State.storage_create(
                     request.get_json(silent=True))
         return (jsonify(returnedValue), 200)
     except BaseModelInvalidDataDictionary:
@@ -39,7 +39,7 @@ def post_a_state():
 def get_state_by_id(state_id):
     """handles State object: state_id"""
     try:
-        returnedValue = State.api_get_single(state_id)
+        returnedValue = State.storage_get_dict_from_object(state_id)
         return (jsonify(returnedValue), 200)
     except BaseModelInvalidObject:
         abort(404)
@@ -51,7 +51,7 @@ def get_state_by_id(state_id):
 def del_state_by_id(state_id):
     """handles PUT State object: state_id"""
     try:
-        return (jsonify(State.api_delete(state_id)), 200)
+        return (jsonify(State.storage_delete(state_id)), 200)
     except BaseModelInvalidObject:
         abort(404)
 
@@ -62,10 +62,9 @@ def del_state_by_id(state_id):
 def update_state_by_id(state_id):
     """handles PUT State object: state_id"""
     try:
-        returnedValue= State.api_put(
+        returnedValue= State.storage_update(
                         request.get_json(silent=True),
-                        storage.get("State", state_id))
-        storage.save()
+                        state_id)
         return (jsonify(returnedValue), 200)
     except BaseModelInvalidDataDictionary:
         return (jsonify({'error': 'Not a JSON'}), 400)
