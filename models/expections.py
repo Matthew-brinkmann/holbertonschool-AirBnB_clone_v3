@@ -19,8 +19,10 @@ class BaseModelInvalidObject(Exception):
 
     def __str__(self):
         """str definition"""
-        return (f'{self.code} -> {self.object} -> {self.message}')
-
+        return ('{} -> {} -> {}'.format(
+            self.code,
+            self.object,
+            self.message))
 
 class BaseModelInvalidDataDictionary(Exception):
     """Exception raised for errors in the updating storage
@@ -43,7 +45,10 @@ class BaseModelInvalidDataDictionary(Exception):
 
     def __str__(self):
         """str definition"""
-        return (f'{self.code} -> {self.dictionary} -> {self.message}')
+        return ('{} -> {} -> {}'.format(
+            self.code,
+            self.dictionary,
+            self.message))
 
 
 class BaseModelMissingAttribute(Exception):
