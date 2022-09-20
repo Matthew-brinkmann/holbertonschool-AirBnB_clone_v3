@@ -13,6 +13,7 @@ class State(BaseModel, Base):
     """Representation of state """
 
     IGNORE_ATTR = ['id', 'created_at', 'updated_at']
+    REQUIRED_ATTR = ["name"]
     if models.storage_t == "db":
         __tablename__ = 'states'
         name = Column(String(128), nullable=False)

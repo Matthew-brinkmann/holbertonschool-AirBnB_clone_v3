@@ -21,7 +21,6 @@ def get_all_states():
         )
     if request.method == 'POST':
         returnedValue, code = State.api_post(
-                    ["name"],
                     request.get_json(silent=True))
     return (jsonify(returnedValue), code)
 
