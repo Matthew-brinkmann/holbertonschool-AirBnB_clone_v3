@@ -38,7 +38,35 @@ class State(BaseModel, Base):
 
     @classmethod
     def api_put(cls, resuestDataAsDict, ObjToUpdate):
-        return(BaseModel.api_put(
+        return (BaseModel.storage_update(
                 cls.IGNORE_ATTR,
                 resuestDataAsDict,
                 ObjToUpdate))
+
+    @classmethod
+    def api_post(cls, resuestDataAsDict):
+        return (BaseModel.storage_create(
+            cls.REQUIRED_ATTR,
+            resuestDataAsDict
+        ))
+    
+    @classmethod
+    def api_get_all(cls):
+        return (BaseModel.
+                storage_get_dict_array_from_object_array(
+            models.storage.all(cls).values()
+        ))
+
+    @classmethod
+    def api_delete(cls, idOfObjectToDelete):
+        """handles the API delete command for all types"""
+        return (BaseModel.storage_delete(
+            models.storage.get(cls, idOfObjectToDelete)
+        ))
+
+    @classmethod
+    def api_get_single(cls, idOfObjToRetrieve):
+        """handles the API get command for specific object"""
+        return (BaseModel.storage_get_dict_from_object(
+            models.storage.get(cls, idOfObjToRetrieve)
+        ))

@@ -11,6 +11,8 @@ from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
 
+from models.expections import *
+
 time = "%Y-%m-%dT%H:%M:%S.%f"
 
 if models.storage_t == "db":
@@ -75,38 +77,38 @@ class BaseModel:
         models.storage.delete(self)
 
     @classmethod
-    def api_put(cls, listToIgnore, resuestDataAsDict, ObjToUpdate):
-        """handles the API put command for all types
-        Return Values: 200: Success
-        404: invalid object
-        400: invalid Json"""
+    def storage_update(cls, listToIgnore, resuestDataAsDict, ObjToUpdate):
+        """handles the update command for all types
+        Return Values: 0: Success
+        Exceptions Raised
+        -1: BaseModelInvalidObject
+        -2: BaseModelInvalidJson"""
         if not cls.test_request_data(resuestDataAsDict):
-            return ({'error': 'Not a JSON'}, 400)
+            raise BaseModelInvalidDataDictionary(resuestDataAsDict)
         if ObjToUpdate is None:
-            return (None, 404)
+            raise BaseModelInvalidObject(ObjToUpdate)
         for key, value in resuestDataAsDict.items():
             if key in listToIgnore:
                 continue
             setattr(ObjToUpdate, key, value)
         ObjToUpdate.save()
-        return (ObjToUpdate.to_dict(), 200)
+        return (ObjToUpdate.to_dict())
 
     @classmethod
-    def api_post(cls, listOfTestAttrs, resuestDataAsDict):
+    def storage_create(cls, listOfReqAttrs, resuestDataAsDict):
         """handles the API post command for all types
-        Return Values: 200: Success
-        404: missing Attribute
-        400: invalid Json"""
+        Return Values: dictionary of New Object.
+        Exceptions Raised:
+        -3: missing Attribute
+        -2: invalid Json"""
         if not cls.test_request_data(resuestDataAsDict):
-            return ({'error': 'Not a JSON'}, 400)
-        print("\t PR: after if not")
-        for attribute in listOfTestAttrs:
+            raise BaseModelInvalidDataDictionary(resuestDataAsDict)
+        for attribute in listOfReqAttrs:
             if resuestDataAsDict.get(attribute) is None:
-                return ({'error': 'Missing {}'.
-                         format(attribute)}, 400)
-        newState = cls(**resuestDataAsDict)
-        newState.save()
-        return (newState.to_dict(), 200)
+                raise BaseModelMissingAttribute(attribute)
+        newObject = cls(**resuestDataAsDict)
+        newObject.save()
+        return (newObject.to_dict())
 
     @classmethod
     def test_request_data(cls, requestDataAsDict):
@@ -116,29 +118,30 @@ class BaseModel:
         return (True)
 
     @staticmethod
-    def api_delete(objectToDelete):
+    def storage_delete(objectToDelete):
         """handles the API delete command for all types
         return Values: 200: success
         404: invalid object.
         """
         if objectToDelete is None:
-            return (None, 404)
+            raise BaseModelInvalidObject(objectToDelete)
         objectToDelete.delete()
-        return ({}, 200)
+        models.storage.save()
+        return ({})
 
     @staticmethod
-    def api_get_single(ObjToRetrieve):
+    def storage_get_dict_from_object(ObjToRetrieve):
         """handles the API get command for specific object
         return Values: 200: success
         404: invalid object.
         """
         if ObjToRetrieve is None:
-            return (None, 404)
-        return (ObjToRetrieve.to_dict(), 200)
+            raise BaseModelInvalidObject(ObjToRetrieve)
+        return (ObjToRetrieve.to_dict())
 
     @staticmethod
-    def api_get_all(listOfObjsToRetrieve):
+    def storage_get_dict_array_from_object_array(arrayOfObjsToRetrieve):
         """handles the API get command for all objects
         return Values: 200: success
         """
-        return ([obj.to_dict() for obj in listOfObjsToRetrieve], 200)
+        return ([obj.to_dict() for obj in arrayOfObjsToRetrieve])

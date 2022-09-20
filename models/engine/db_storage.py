@@ -3,10 +3,12 @@
 Contains the class DBStorage
 """
 
+
 import models
 from models.amenity import Amenity
 from models.base_model import BaseModel, Base
 from models.city import City
+from models.engine.AbstractEngine import AbstractEngine
 from models.place import Place
 from models.review import Review
 from models.state import State
@@ -20,7 +22,7 @@ classes = {"Amenity": Amenity, "City": City,
            "Place": Place, "Review": Review, "State": State, "User": User}
 
 
-class DBStorage:
+class DBStorage(AbstractEngine):
     """interaacts with the MySQL database"""
     __engine = None
     __session = None
